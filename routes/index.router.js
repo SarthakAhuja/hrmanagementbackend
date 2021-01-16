@@ -9,8 +9,9 @@ router.post('/register', ctrlUser.register);
 router.post('/authenticate', ctrlUser.authenticate);
 router.get('/userProfile',jwtHelper.verifyJwtToken, ctrlUser.userProfile);
 router.post('/saveUser', ctrlUser.signup);
-// router.post('/checkin', ctrlUser.attendance);
 router.post('/savePassword', ctrlUser.savePassword);
+router.post('/checkin',jwtHelper.verifyJwtToken, ctrlUser.attendance);
+router.post('/checkout',jwtHelper.verifyJwtToken, ctrlUser.checkout);
 
 module.exports = router;
 

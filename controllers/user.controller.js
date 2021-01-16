@@ -1,16 +1,17 @@
 const mongoose = require('mongoose');
 
 var User = mongoose.model('User');
-// var Attendance =mongoose.model('Attendance')
-var Attendance = require('../models/attendance.model')
+var Attendance =mongoose.model('Attendance')
+// var Attendance = require('../models/attendance.model')
 const passport = require('passport');
 const _ = require('lodash');
 const randomstring = require('randomstring');
 const nodemailer = require("nodemailer");
- const commonFunction =  require('../helper/common');;
+ const commonFunction =  require('../helper/common');
 const async = require('async');
+const bcrypt = require('bcryptjs');
 
-//  const Attendance =  mongoose('Attendance');
+
 
 module.exports.register = (req, res, next) => {
     var user = new User();
@@ -43,12 +44,13 @@ module.exports.authenticate = (req, res, next) => {
 }
 
 module.exports.userProfile = (req, res, next) =>{
-    User.findOne({ _id: req._id },
+    console.log(req.id)
+    User.findOne({ id: req.id },
         (err, user) => {
             if (!user)
                 return res.status(404).json({ status: false, message: 'User record not found.' });
             else
-                return res.status(200).json({ status: true, user : _.pick(user,['fullName','email']) });
+                return res.status(200).json({ status: true, user : _.pick(user,['fullName','email','role','phone_number']) });
         }
     );
 }
@@ -137,7 +139,12 @@ module.exports.savePassword =  (req, res)=> {
                         } else {
                             console.log(userInstance, "sssssssssssss");
                             if (userInstance) {
-                                userInstance.update({
+                                bcrypt.genSalt(10, (err, salt) => {
+                                    bcrypt.hash(data.password, salt, (err, hash) => {
+                                        data.password = hash;
+                                        var saltSecret = salt;
+                        
+                                    userInstance.updateOne({
                                     "verificationToken": "",
                                     "password":data.password,
                                    
@@ -149,6 +156,9 @@ module.exports.savePassword =  (req, res)=> {
                                         callback(null, result);
                                     }
                                 });
+                                         // next();
+                                        });
+                                    });
                             } else {
                                 callback({ code: 'error', message: "TOKEN_INVALID" });
                             }
@@ -171,6 +181,63 @@ module.exports.savePassword =  (req, res)=> {
 };
 
 
+
+module.exports.attendance =  (req,res) =>{
+
+   console.log(req.id)
+   if(req.id){
+       var datee = new Date();
+         req.body.loginTime =datee;
+         req.body.userId =req.id;
+         var attendance =  new Attendance(req.body);
+
+         attendance.save((err,result)=>{
+             if(err){
+                 console.log(err);
+             }else{
+                 console.log(result);
+             }
+         })
+        }else{
+            res.send({message:"not logged in"})
+        }
+
+}
+
+
+
+module.exports.checkout =  (req,res)=>{
+    if(req.id){
+        var datee = new Date();
+       
+
+        Attendance.findOne({userId:req.id},
+            (err,user)=>{
+            if(err)
+            {
+                res.send({message:"Internal server error"})
+            }
+            else{
+                if(user){
+                    user.updateOne({
+                        "logoutTime":datee
+                    },(err,time)=>{
+                        if(err){
+                            console.log(err);
+                        }else{
+                            if(time){
+                                res.send(time);
+                            }
+                        }
+                    })
+                }
+            }
+        })
+        
+    }else{
+        res.send({message:"User not logged in"})
+    }
+}
 var mailId
 var tokenID
 
@@ -187,7 +254,7 @@ async function main(){
     secure: false, 
     auth: {
       user: "testmail3637@gmail.com",
-      pass: "mannu3637" 
+      pass: "mannu3637@" 
     }
   });
 
