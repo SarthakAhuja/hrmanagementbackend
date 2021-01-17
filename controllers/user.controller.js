@@ -56,7 +56,7 @@ module.exports.userProfile = (req, res, next) =>{
 }
 module.exports.signup = (req,res)=>
 {
-
+    if(req.id) {
     if(req.body.email&&req.body.role&&req.body.phone_number&&req.body.fullName)
     {   req.body.verificationToken =randomstring.generate();
          req.body.id=Date.now();
@@ -114,7 +114,10 @@ module.exports.signup = (req,res)=>
         res.send({
             error:"insuffient details"
         })
-    }   
+    } 
+}else{
+    console.log("not admin")
+}  
     
 }
 
@@ -198,6 +201,7 @@ module.exports.attendance =  (req,res) =>{
                  console.log(err);
              }else{
                  console.log(result);
+                 res.send({result})
              }
          })
         }else{
@@ -245,7 +249,7 @@ module.exports.checkout =  (req,res)=>{
 }
 
 
-module.exports.getAttendance  = (req,res) =>{
+module.exports.getAttendance  = (req,res) =>{ //ek user ki sare attendance
     try{
         if(req.id){
             Attendance.find({userId:req.id},["loginTime","logoutTime","-_id"],(err,attendance)=>{
@@ -266,6 +270,43 @@ module.exports.getAttendance  = (req,res) =>{
     }
 }
 
+
+module.exports.lastWeekAttendance =  (req,res) =>{ //ek user ki last 7 days ki attendance
+    if(req.id){
+       
+        Attendance.find({userId:req.id,$and:[{loginTime:{$lte:moment(new Date()).format("YYYY-MM-DD HH:mm:ss")}},{loginTime:{$gte:moment(new Date ()).subtract(7,"days").format("YYYY-MM-DD HH:mm:ss")}}]},(err,attendance)=>{
+            if(err) {
+                res.send({message:"Internal server error"})
+            }else{
+                res.send({attendance})
+            }
+        })
+    
+    }else{
+        console.log("not logged in")
+    }
+}
+
+module.exports.employeeDetails =  (req,res)=>{ //sare users ki details
+if(req.id){
+    User.find({},["fullName",'phone_number',"email","-_id"],(err,users)=>{
+        if(err){
+        res.send({message:"Internal server error"})
+        }
+        else{
+            if(users){
+                res.send({users})
+            }else{
+                console.log("error")
+            }
+        }
+    })
+}
+
+}
+
+    
+  
 
 var mailId
 var tokenID
