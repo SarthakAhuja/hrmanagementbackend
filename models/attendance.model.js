@@ -5,15 +5,16 @@ var attendanceSchema = new mongoose.Schema({
     userId: {
         type: Number,
         required: 'no user id',
-        unique:true  
+         
     },
     loginTime: {
         type: Date,   
     },
     logoutTime:{
         type:Date,
-    }
-       
+        default:0
+    },
+    
 });
 
 

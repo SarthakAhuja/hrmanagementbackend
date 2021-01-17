@@ -33,7 +33,8 @@ var userSchema = new mongoose.Schema({
         type:Number
     },
     status:{
-        type:Number
+        type:Number,    
+        default:0
     },
     saltSecret: String
 });

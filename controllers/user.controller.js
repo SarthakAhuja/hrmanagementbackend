@@ -10,7 +10,7 @@ const nodemailer = require("nodemailer");
  const commonFunction =  require('../helper/common');
 const async = require('async');
 const bcrypt = require('bcryptjs');
-
+const moment = require('moment');
 
 
 module.exports.register = (req, res, next) => {
@@ -37,7 +37,7 @@ module.exports.authenticate = (req, res, next) => {
         
         if (err) return res.status(400).json(err);
        
-        else if (user) return res.status(200).json({ "token": user.generateJwt() });
+        else if (user) return res.status(200).json({ "token": user.generateJwt() ,"role":user.role});
        
         else return res.status(404).json(info);
     })(req, res);
@@ -147,6 +147,7 @@ module.exports.savePassword =  (req, res)=> {
                                     userInstance.updateOne({
                                     "verificationToken": "",
                                     "password":data.password,
+                                    "status":1
                                    
                                 }, function (err, result) {
                                     if (err) {
@@ -186,8 +187,9 @@ module.exports.attendance =  (req,res) =>{
 
    console.log(req.id)
    if(req.id){
-       var datee = new Date();
-         req.body.loginTime =datee;
+    var startDate = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+      
+         req.body.loginTime =startDate;
          req.body.userId =req.id;
          var attendance =  new Attendance(req.body);
 
@@ -211,33 +213,60 @@ module.exports.checkout =  (req,res)=>{
         var datee = new Date();
        
 
-        Attendance.findOne({userId:req.id},
-            (err,user)=>{
+        Attendance.findOne({userId:req.id}).sort({'loginTime':-1}).exec(function(err,user){
+         
             if(err)
             {
                 res.send({message:"Internal server error"})
             }
-            else{
+            else {
                 if(user){
-                    user.updateOne({
-                        "logoutTime":datee
-                    },(err,time)=>{
-                        if(err){
-                            console.log(err);
-                        }else{
-                            if(time){
-                                res.send(time);
-                            }
+                    console.log(user)
+                user.updateOne({
+                    "logoutTime":datee
+                },(err,time)=>{
+                    if(err){
+                        console.log(err);
+                    }else{
+                        if(time){
+                            res.send(time);
                         }
-                    })
-                }
+                    }
+                })
+                res.send(user)
             }
+            }
+           
         })
         
     }else{
         res.send({message:"User not logged in"})
     }
 }
+
+
+module.exports.getAttendance  = (req,res) =>{
+    try{
+        if(req.id){
+            Attendance.find({userId:req.id},["loginTime","logoutTime","-_id"],(err,attendance)=>{
+                if(err){
+                    res.send({message:"Internal server error"})
+                }
+                else{
+                    if(attendance){
+                        res.status(200).json({attendance})
+                    }
+                }
+            })
+        }else{
+            res.send({message:"User not logged in"})
+        }
+    }catch(e){
+        res.send({message:e})
+    }
+}
+
+
 var mailId
 var tokenID
 

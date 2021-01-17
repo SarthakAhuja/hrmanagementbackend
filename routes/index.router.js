@@ -12,6 +12,7 @@ router.post('/saveUser', ctrlUser.signup);
 router.post('/savePassword', ctrlUser.savePassword);
 router.post('/checkin',jwtHelper.verifyJwtToken, ctrlUser.attendance);
 router.post('/checkout',jwtHelper.verifyJwtToken, ctrlUser.checkout);
+router.get('/attendance',jwtHelper.verifyJwtToken, ctrlUser.getAttendance);
 
 module.exports = router;
 
