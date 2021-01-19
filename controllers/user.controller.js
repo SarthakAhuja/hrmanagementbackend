@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 var User = mongoose.model('User');
 var Attendance =mongoose.model('Attendance')
-// var Attendance = require('../models/attendance.model')
+var Leave =mongoose.model('Leave')
 const passport = require('passport');
 const _ = require('lodash');
 const randomstring = require('randomstring');
@@ -191,7 +191,7 @@ module.exports.attendance =  (req,res) =>{
    console.log(req.id)
    if(req.id){
     var startDate = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-      
+         req.body.present = 1;
          req.body.loginTime =startDate;
          req.body.userId =req.id;
          var attendance =  new Attendance(req.body);
@@ -201,7 +201,7 @@ module.exports.attendance =  (req,res) =>{
                  console.log(err);
              }else{
                  console.log(result);
-                 res.send({result})
+                 res.send({message:result,present:result.present})
              }
          })
         }else{
@@ -214,7 +214,7 @@ module.exports.attendance =  (req,res) =>{
 
 module.exports.checkout =  (req,res)=>{
     if(req.id){
-        var datee = new Date();
+        var datee = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
        
 
         Attendance.findOne({userId:req.id}).sort({'loginTime':-1}).exec(function(err,user){
@@ -303,6 +303,29 @@ if(req.id){
     })
 }
 
+}
+module.exports.leave =  (req,res)=>{
+    if(req.id){
+        if(true){
+            var datee =new Date()
+        var leave = new Leave();
+        leave.days = req.body.days;
+        leave.reason = req.body.reason;
+        leave.date=req.body.date
+        leave.userId = req.id;
+        leave.save((err,leaves)=>{
+            if(err){
+                res.send({message:err})
+            } else{
+                res.send({message:leaves})
+            }
+        })
+        }else{
+            res.send({message:"Insufficient details"})
+        }
+    }else{
+    res.send({message:"Not logged in"})
+    }
 }
 
     

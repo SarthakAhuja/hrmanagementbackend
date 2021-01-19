@@ -14,6 +14,10 @@ var attendanceSchema = new mongoose.Schema({
         type:Date,
         default:0
     },
+    present:{
+        type:Number,
+        default:0
+    }
     
 });
 

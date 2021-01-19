@@ -15,6 +15,7 @@ router.post('/checkout',jwtHelper.verifyJwtToken, ctrlUser.checkout);
 router.get('/attendance',jwtHelper.verifyJwtToken, ctrlUser.getAttendance);
 router.get('/lastweek',jwtHelper.verifyJwtToken, ctrlUser.lastWeekAttendance);
 router.get('/getEmployees',jwtHelper.verifyJwtToken, ctrlUser.employeeDetails);
+router.post('/addLeave',jwtHelper.verifyJwtToken, ctrlUser.leave);
 
 
 module.exports = router;
