@@ -16,6 +16,8 @@ router.get('/attendance',jwtHelper.verifyJwtToken, ctrlUser.getAttendance);
 router.get('/lastweek',jwtHelper.verifyJwtToken, ctrlUser.lastWeekAttendance);
 router.get('/getEmployees',jwtHelper.verifyJwtToken, ctrlUser.employeeDetails);
 router.post('/addLeave',jwtHelper.verifyJwtToken, ctrlUser.leave);
+router.get('/getLeave',jwtHelper.verifyJwtToken, ctrlUser.getLeave);
+router.get('/getAllLeave',jwtHelper.verifyJwtToken, ctrlUser.getAllLeave);
 
 
 module.exports = router;

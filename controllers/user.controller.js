@@ -190,7 +190,9 @@ module.exports.attendance =  (req,res) =>{
 
    console.log(req.id)
    if(req.id){
+    var today = new Date().getHours();
     var startDate = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+     
          req.body.present = 1;
          req.body.loginTime =startDate;
          req.body.userId =req.id;
@@ -215,9 +217,7 @@ module.exports.attendance =  (req,res) =>{
 module.exports.checkout =  (req,res)=>{
     if(req.id){
         var datee = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
-       
-
-        Attendance.findOne({userId:req.id}).sort({'loginTime':-1}).exec(function(err,user){
+       Attendance.findOne({userId:req.id}).sort({'loginTime':-1}).exec(function(err,user){
          
             if(err)
             {
@@ -225,19 +225,19 @@ module.exports.checkout =  (req,res)=>{
             }
             else {
                 if(user){
-                    console.log(user)
+                console.log(user)
                 user.updateOne({
                     "logoutTime":datee
                 },(err,time)=>{
                     if(err){
                         console.log(err);
                     }else{
-                        if(time){
-                            res.send(time);
-                        }
+                       res.send({message:time});
+                        
                     }
                 })
-                res.send(user)
+            }else{
+                res.send({message:"Internal Server error"})
             }
             }
            
@@ -325,6 +325,34 @@ module.exports.leave =  (req,res)=>{
         }
     }else{
     res.send({message:"Not logged in"})
+    }
+}
+
+module.exports.getLeave = (req,res)=>{
+if(req.id){
+    Leave.find({userId:req.id},(err,leaves)=>{
+        if(err){
+            res.send(err);
+                }
+                else{
+                    res.send({leaves})
+                }
+    })
+}else{
+    res.send({message:"not logged in!"})
+}
+}
+module.exports.getAllLeave = (req,res)=>{
+    if(req.id){
+        
+        Leave.find({},(err,leaves)=>{
+            if(err){
+                res.send(err)
+            }
+            else{
+                res.send({leaves})
+        }
+        })
     }
 }
 
